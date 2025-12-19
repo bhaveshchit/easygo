@@ -1,0 +1,718 @@
+.home-page {
+  background-color: #2C315A;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.buildings-image {
+  position: absolute;
+  bottom: 20vh; /* Adjusted to make it partially visible */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: auto; /* Maintain aspect ratio */
+  z-index: 0; /* Placed behind the circle, but not completely */
+}
+
+.persons-image {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 30%; /* Adjust as needed */
+  height: auto; /* Maintain aspect ratio */
+  z-index: 2; /* Ensure it's above buildings and circle */
+}
+
+.circle-image {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%) scaleY(-1);
+  width: 120%;
+  height: 60vh; /* Cover half the screen height */
+  object-fit: cover;
+  border-radius: 0 0 50% 50%; /* Make the bottom half rounded */
+  z-index: 1; /* Ensure it's above the buildings */
+}
+
+/* Info Card Styles */
+.info-card {
+  max-width: 520px;
+  padding: 20px 70px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  text-align: center;
+  margin: 0 auto;
+  position: absolute; /* Position it absolutely */
+  top: 65%; /* Adjust as needed */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3; /* Ensure it's above other elements */
+}
+
+/* Title */
+.info-card h3 {
+  margin: 0 0 6px 0;
+  font-family: "Poppins", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #e6f4ff;
+}
+
+/* Subtitle */
+.info-card p {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* Let's Go Button Styles */
+.lets-go-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 12px 40px;
+  border-radius: 12px;
+
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #f2f2f2 100%
+  );
+
+  border: none;
+  cursor: pointer;
+
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a1a;
+
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+
+  /* Removed transition */
+
+  position: absolute; /* Position it absolutely */
+  top: 85%; /* Adjust as needed */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4; /* Ensure it's above other elements */
+}
+
+/* Steering Wheel Icon styling */
+.steering-wheel-icon {
+  width: 1em;
+  height: 1em;
+  vertical-align: middle;
+}
+
+/* Emoji styling (kept for reference, but not used now) */
+.lets-go-btn .emoji {
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* Hover effect */
+.lets-go-btn:hover {
+  /* Removed transform and box-shadow */
+}
+
+/* Active (click) */
+.lets-go-btn:active {
+  /* Removed transform and box-shadow */
+}
+
+/* Slider Dots Container */
+.slider-dots-container {
+  position: absolute;
+  bottom: 20px; /* Adjust as needed */
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 5; /* Ensure it's above other elements */
+}
+
+/* Slider Dot */
+.slider-dot {
+  width: 8px;
+  height: 8px;
+  background-color: rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.slider-dot.active {
+  background-color: #ffffff;
+}
+
+.vector-image {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 10%; /* Example size, adjust as needed */
+  height: auto;
+  z-index: 10; /* Ensure it's above other elements if necessary */
+}
+
+.vector-text {
+  position: absolute;
+  top: 80px; /* Adjust based on vector-image height and desired spacing */
+  left: 20px; /* Align with vector-image or adjust as needed */
+  font-size: 0.5em; /* Small font size */
+  color: white; /* Assuming white text on dark background */
+  z-index: 10;
+}
+
+.skip-button {
+  position: absolute;
+  top: 20px; /* Adjust to align with vector-image, considering its padding/margin */
+  right: 10px; /* Position from the right */
+  background: none;
+  border: none;
+  color: white;
+  font-size: .7em;
+  cursor: pointer;
+  z-index: 10;
+  padding: 5px 10px; /* Add some padding for better click area */
+}
+
+.skip-button:hover {
+  text-decoration: underline;
+}
+
+.auth-background {
+  background-color: #2A2E55; /* Solid background color */
+  background-image: url('/customer.png'); /* Image on top of the color */
+  background-size: cover; /* Cover the entire area */
+  background-position: center; /* Center the image */
+  background-repeat: no-repeat; /* Do not repeat the image */
+  min-height: 100vh; /* Ensure it covers the full viewport height */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white; /* Assuming white text on this background */
+  position: relative; /* Needed for pseudo-element positioning */
+}
+
+.auth-background::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(42, 46, 85, 0.2); /* #2A2E55 with 20% opacity */
+  z-index: 1; /* Ensure it's above the background image but below content */
+}
+
+.authentication-page > * {
+  z-index: 2; /* Ensure content is above the overlay */
+}
+
+/* Page center */
+.auth-wrapper {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Card */
+.auth-card {
+  width: 600px; /* Increased width to match login card */
+  padding: 40px;
+  border-radius: 18px;
+
+  background: rgba(255, 255, 255, 0.05); /* More transparent */
+  backdrop-filter: blur(20px); /* Increased blur */
+  -webkit-backdrop-filter: blur(20px);
+
+  border: 1px solid rgba(255, 255, 255, 0.3); /* Slightly stronger border */
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4); /* Enhanced shadow */
+
+  text-align: center;
+  color: #fff;
+  font-family: "Poppins", sans-serif;
+}
+
+/* Title */
+.auth-card h2 {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 600;
+}
+
+/* Subtitle */
+.subtitle {
+  margin: 6px 0 20px;
+  font-size: 17px;
+  opacity: 0.8;
+}
+
+/* Social buttons grid */
+.social-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
+/* Social button */
+.social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Reverted to center for auth-card */
+  gap: 8px;
+
+  padding: 12px; /* Adjusted padding */
+  border-radius: 10px;
+
+  background: rgba(255, 255, 255, 0.08); /* More transparent */
+  border: 1px solid rgba(255, 255, 255, 0.25);
+
+  color: #fff;
+  font-size: 16px; /* Slightly reduced font size */
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.social-btn-text {
+  flex-grow: 1; /* Allow text to take up available space */
+  text-align: center; /* Center the text within its available space */
+  margin-right: 20px; /* Counteract the padding-left on the button */
+}
+
+.social-btn:hover {
+  background: rgba(255, 255, 255, 0.15); /* More transparent on hover */
+}
+
+/* Primary button */
+.primary-btn {
+  width: 80%; /* Decreased width */
+  margin: 0 auto 10px auto; /* Centered */
+  padding: 16px;
+  border-radius: 10px;
+
+  background: #1e78d6;
+  border: none;
+
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+
+  transition: background 0.2s ease;
+}
+
+.primary-btn:hover {
+  background: #1666bb;
+}
+
+/* Secondary button */
+.secondary-btn {
+  width: 80%; /* Decreased width */
+  margin: 0 auto; /* Centered */
+  padding: 16px;
+  border-radius: 10px;
+
+  background: rgba(255, 255, 255, 0.1); /* More transparent */
+  border: none;
+
+  color: #fff;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* Terms */
+.terms {
+  margin-top: 16px;
+  font-size: 13px;
+  opacity: 0.75;
+  line-height: 1.4;
+}
+
+.terms span {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* New Login Card Styles */
+.login-wrapper {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* background: #2c315a;  Removed to keep existing background */
+  font-family: "Poppins", sans-serif;
+}
+
+.login-card {
+  width: 600px; /* Increased width further */
+  padding: 40px; /* Keep padding for height */
+  border-radius: 18px;
+
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.4);
+
+  color: #fff;
+}
+
+/* Heading */
+.login-card h2 {
+  text-align: center;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 18px;
+}
+
+/* Tabs */
+.login-tabs {
+  display: flex;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 10px;
+  background: transparent;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.tab-btn.active {
+  background: #1e78d6;
+  border-radius: 10px;
+}
+
+/* Fields */
+.field {
+  margin-bottom: 14px;
+}
+
+.field label {
+  font-size: 12px;
+  opacity: 0.85;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.input-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 10px 12px;
+  border-radius: 10px;
+
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.input-box input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-size: 13px;
+}
+
+.input-box input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.icon {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.icon.right {
+  cursor: pointer;
+}
+
+/* Forgot */
+.forgot {
+  display: block;
+  text-align: right;
+  font-size: 12px;
+  margin-top: 6px;
+  opacity: 0.75;
+  cursor: pointer;
+}
+
+/* Login button */
+.login-btn {
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 10px;
+
+  background: linear-gradient(180deg, #2f8cff, #1e78d6);
+  border: none;
+  color: #fff;
+
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Divider */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.divider span {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+/* Social buttons */
+.social-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.social-btn {
+  display: flex; /* Added display flex */
+  align-items: center; /* Added align-items center */
+  justify-content: center; /* Keep centered */
+  gap: 8px; /* Added gap */
+
+  padding: 12px; /* Adjusted padding */
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  font-size: 14px; /* Slightly increased font size */
+  cursor: pointer;
+}
+
+/* Terms */
+.terms {
+  margin-top: 18px;
+  font-size: 11px;
+  text-align: center;
+  opacity: 0.75;
+}
+
+.terms strong {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.forgot-otp-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 6px; /* Adjust as needed */
+  margin-bottom: 14px; /* Adjust as needed */
+}
+
+/* OTP Wrapper */
+.otp-wrapper {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* background: #2c315a;  Removed to keep existing background */
+  font-family: "Poppins", sans-serif;
+}
+
+/* Card */
+.otp-card {
+  width: 420px;
+  padding: 32px;
+  border-radius: 16px;
+
+  background: linear-gradient(
+    180deg,
+    rgba(32, 51, 132, 0.55),
+    rgba(255, 255, 255, 0.12)
+  );
+
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.4);
+
+  text-align: center;
+  color: #fff;
+}
+
+/* Heading */
+.otp-card h2 {
+  margin: 0 0 10px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+/* Description */
+.otp-desc {
+  font-size: 13px;
+  line-height: 1.5;
+  opacity: 0.85;
+  margin-bottom: 22px;
+}
+
+.otp-desc strong {
+  font-weight: 500;
+}
+
+/* Label */
+.otp-label {
+  font-size: 13px;
+  margin-bottom: 12px;
+  opacity: 0.9;
+}
+
+/* OTP boxes */
+.otp-inputs {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.otp-inputs input {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+
+  outline: none;
+}
+
+/* Primary button */
+.otp-primary {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+
+  background: linear-gradient(180deg, #2f8cff, #1e78d6);
+  border: none;
+
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+
+  margin-bottom: 12px;
+}
+
+/* Secondary button */
+.otp-secondary {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+
+  background: rgba(255, 255, 255, 0.25);
+  border: none;
+
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.error-message {
+  color: red;
+  font-size: 12px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.login-password-text {
+  font-size: 12px;
+  opacity: 0.75;
+  text-align: left; /* Changed to left-aligned */
+  margin-top: -8px; /* Adjust as needed to align with the field */
+  margin-bottom: 14px;
+  cursor: pointer; /* Indicate it's clickable */
+}
+
+.login-otp-text {
+  font-size: 12px;
+  opacity: 0.75;
+  text-align: left; /* Reverted to left-aligned */
+  margin-top: 6px; /* Adjust as needed */
+  cursor: pointer; /* Indicate it's clickable */
+}
+.country-code-input-box {
+  display: flex;
+  align-items: center;
+  /* Inherits padding, border-radius, background from .input-box */
+}
+
+.country-code-input-box .country-code-input {
+  width: 35px; /* Decreased width for country code */
+  flex-grow: 0; /* Prevent it from growing */
+  flex-shrink: 0; /* Prevent it from shrinking */
+  text-align: center;
+  background: rgba(255, 255, 255, 0.1); /* Slightly different background for distinction */
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Border for distinction */
+  border-radius: 8px;
+  padding: 10px 2px; /* Further decreased horizontal padding */
+  margin-right: 8px; /* Space between country code and mobile number input */
+  color: #fff;
+  font-size: 13px;
+  outline: none;
+}
+
+.country-code-input-box .country-code-input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.country-code-input-box input[type="tel"] {
+  flex: 1; /* Allow mobile number input to take remaining space */
+  /* Inherits other styles from .input-box input */
+}

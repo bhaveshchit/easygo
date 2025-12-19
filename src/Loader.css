@@ -1,0 +1,81 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 20vmin;
+  pointer-events: none;
+  animation: rotate-and-return 2s ease-in-out 1, slide-left 1s ease-in-out 2s 1 forwards;
+}
+
+.App-header {
+  background-color: #000000;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+  overflow: hidden; /* To hide the text before it appears */
+  animation: change-background 1s ease-in-out 2s 1 forwards;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-text {
+  opacity: 0;
+  animation: fade-in-right 1s ease-in-out 2s 1 forwards;
+  font-size: 0;
+  margin-left: 0;
+  white-space: nowrap;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+}
+
+@keyframes rotate-and-return {
+  0% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-90deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes slide-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-20%);
+  }
+}
+
+@keyframes fade-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(-100%);
+    font-size: 0;
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+    font-size: 12vmin;
+  }
+}
+
+@keyframes change-background {
+  from {
+    background-color: #000000;
+  }
+  to {
+    background-color: #2C315A;
+  }
+}
