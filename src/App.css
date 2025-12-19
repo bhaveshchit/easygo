@@ -559,6 +559,85 @@
   font-family: "Poppins", sans-serif;
 }
 
+
+
+/* keep existing keyframes */
+@keyframes fadeIn {
+  from { opacity: 0 } to { opacity: 1 }
+}
+@keyframes popIn {
+  from { transform: translateY(-6px) scale(0.995); opacity: 0 }
+  to { transform: translateY(0) scale(1); opacity: 1 }
+}
+
+/* Success card (non-blocking) */
+.success-card {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100000;
+  background: linear-gradient(180deg, #ffffff, #fafafa);
+  border: 1px solid rgba(15,23,32,0.06);
+  box-shadow: 0 18px 40px rgba(2,6,23,0.12);
+  border-radius: 12px;
+  padding: 10px 14px;
+  min-width: 320px;
+  max-width: 90%;
+  animation: popIn 220ms cubic-bezier(.2,.9,.2,1) forwards;
+}
+
+.success-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.success-icon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #059e60;
+  background: linear-gradient(180deg, #ecfdf3, #d1fae5);
+  border-radius: 8px;
+  flex: 0 0 44px;
+}
+
+.success-content { flex: 1 1 auto; }
+.success-title { font-weight: 700; color: #081124; font-size: 16px; }
+
+.success-close {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 18px;
+  cursor: button;
+  padding: 6px;
+}
+
+@media (max-width: 480px) {
+  .success-card { top: 12px; min-width: 260px; }
+  .success-title { font-size: 15px }
+}
+
+/* keep existing keyframes */
+@keyframes fadeIn {
+  from { opacity: 0 } to { opacity: 1 }
+}
+
+
+
+@keyframes fadeIn {
+  from { opacity: 0 } to { opacity: 1 }
+}
+@keyframes popIn {
+  from { transform: scale(0.98); opacity: 0 }
+  to { transform: scale(1); opacity: 1 }
+}
+
+
 /* Card */
 .otp-card {
   width: 420px;

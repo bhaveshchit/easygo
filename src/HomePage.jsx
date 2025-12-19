@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import './App.css';
+import { logout } from './features/auth/authSlice';
 
 function HomePage() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const auth = useSelector((state) => state.auth);
   const personImages = ['/perons.png', '/persons2.svg', '/persons3.svg'];
   const [currentPersonIndex, setCurrentPersonIndex] = useState(0);
 
@@ -22,7 +26,16 @@ function HomePage() {
     <div className="home-page">
       <img src="/Vector.svg" className="vector-image" alt="Vector" />
       <p className="vector-text">Send Goods Anywhere Forever</p>
-      <button className="skip-button">Skip-</button>
+      <div className="skip-button">
+        {auth.user ? (
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <span>Hi, {auth.user.recipient}</span>
+            <button onClick={() => { dispatch(logout()); navigate('/auth'); }} className="secondary-btn">Logout</button>
+          </div>
+        ) : (
+          <button className="skip-button">Skip-</button>
+        )}
+      </div>
       <img src="/buildings.svg" className="buildings-image" alt="Buildings" />
       <img src={personImages[currentPersonIndex]} className="persons-image" alt="Persons" />
       <div class="info-card">

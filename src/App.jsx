@@ -5,6 +5,7 @@ import Loader from './Loader';
 import HomePage from './HomePage';
 import AuthenticationPage from './AuthenticationPage';
 
+
 function App() {
   const [loading, setLoading] = useState(true);
 

@@ -1,6 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { FaGoogle, FaApple, FaFacebook, FaTwitter, FaEye, FaEyeSlash, FaMobileAlt, FaEnvelope } from 'react-icons/fa';
 import './App.css'; // Assuming some shared styling
+import SuccessCard from './components/SuccessCard';
+import { sendOtp, verifyOtp, loginWithOtp, signup, login, resetPassword, clearError, clearOtp } from './features/auth/authSlice';
 
 function AuthenticationPage() {
   const [showLoginCard, setShowLoginCard] = useState(false);
@@ -18,6 +22,13 @@ function AuthenticationPage() {
   const [signupPassword, setSignupPassword] = useState(''); // State for signup password
   const [signupConfirmPassword, setSignupConfirmPassword] = useState(''); // State for signup confirm password
   const [passwordMismatchError, setPasswordMismatchError] = useState(false); // State for password mismatch error
+  const [loginPassword, setLoginPassword] = useState(''); // Local password for login (email or mobile)
+  const [otpValues, setOtpValues] = useState(['', '', '', '']); // Controlled OTP inputs
+  const [pendingSignup, setPendingSignup] = useState(null); // Holds { recipient, password } while waiting for OTP
+  const dispatch = useDispatch();
+  const auth = useSelector((state) => state.auth); // Auth state from Redux
+  const navigate = useNavigate();
+
   const [emailError, setEmailError] = useState(''); // State for email validation error
   const [mobileError, setMobileError] = useState(''); // State for mobile number validation error
   const [signupFormError, setSignupFormError] = useState(''); // State for general signup form error
@@ -25,7 +36,18 @@ function AuthenticationPage() {
   const [newPassword, setNewPassword] = useState(''); // State for new password input
   const [confirmNewPassword, setConfirmNewPassword] = useState(''); // State for confirm new password input
   const [resetPasswordError, setResetPasswordError] = useState(''); // State for reset password validation error
-  const [showConfirmationCard, setShowConfirmationCard] = useState(false); // State for confirmation card visibility
+
+  // Success card state
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const successTimerRef = useRef(null);
+
+
+
+
+
+
+
 
   // Validation functions
   const validateEmail = (email) => {
@@ -35,6 +57,36 @@ function AuthenticationPage() {
       return 'Please enter a valid email address.';
     }
     return '';
+  };
+
+  // Helper to show success card and optionally redirect after short delay
+  const triggerSuccessDisplay = (message, redirectTo) => {
+    // clear existing timer
+    if (successTimerRef.current) {
+      clearTimeout(successTimerRef.current);
+      successTimerRef.current = null;
+    }
+    setSuccessMessage(message);
+    setShowSuccess(true);
+
+    // auto-dismiss and redirect after 2s if redirectTo supplied
+    if (redirectTo) {
+      successTimerRef.current = setTimeout(() => {
+        setShowSuccess(false);
+        setSuccessMessage('');
+        try { navigate(redirectTo); } catch (e) { try { window.location.href = redirectTo; } catch (err) {} }
+        successTimerRef.current = null;
+      }, 2000);
+    }
+  };
+
+  const closeSuccess = () => {
+    if (successTimerRef.current) {
+      clearTimeout(successTimerRef.current);
+      successTimerRef.current = null;
+    }
+    setShowSuccess(false);
+    setSuccessMessage('');
   };
 
   const validateMobile = (mobile) => {
@@ -107,22 +159,46 @@ function AuthenticationPage() {
   };
 
   const handleOtpVerification = () => {
-    // Simulate OTP verification success
-    // In a real application, you would send the OTP to your backend for verification
-    console.log('OTP verified successfully for:', otpRecipient, 'Purpose:', otpPurpose);
-
-    setShowOtpCard(false);
-    if (otpPurpose === 'login') {
-      setShowLoginCard(false); // Ensure login card is hidden
-      setShowSignupForm(false); // Ensure signup form is hidden
-      setShowForgotPasswordCard(false); // Ensure forgot password card is hidden
-      setShowResetPasswordCard(false); // Ensure reset password card is hidden
-      setShowConfirmationCard(true); // Show confirmation for login
-    } else if (otpPurpose === 'reset_password') {
-      setShowResetPasswordCard(true); // Show reset password card
-    }
-    // Clear OTP inputs if they were managed by state
-    setOtpPurpose(''); // Clear otpPurpose after use
+    const code = otpValues.join('');
+    const recipient = auth.otpRecipient || otpRecipient;
+    dispatch(verifyOtp({ recipient, code }))
+      .unwrap()
+      .then(() => {
+        // If login via OTP, complete login
+        if (otpPurpose === 'login') {
+          dispatch(loginWithOtp({ recipient }))
+            .unwrap()
+            .then(() => {
+              dispatch(clearOtp());
+              triggerSuccessDisplay('Logged in successfully', '/');
+            })
+            .catch((err) => setSignupFormError(err || 'Login failed'));
+        } else if (otpPurpose === 'reset_password') {
+          setShowOtpCard(false);
+          setShowResetPasswordCard(true);
+        } else if (otpPurpose === 'signup') {
+          // Complete signup after OTP verified
+          if (!pendingSignup) {
+            setSignupFormError('Missing signup data. Please try again.');
+          } else {
+            dispatch(signup({ recipient: pendingSignup.recipient, password: pendingSignup.password }))
+              .unwrap()
+              .then(() => {
+                setPendingSignup(null);
+                dispatch(clearOtp());
+                // Prepare login card and navigate user immediately to login screen
+                setShowLoginCard(true);
+                navigate('/auth');
+              })
+              .catch((err) => setSignupFormError(err || 'Signup failed'));
+          }
+        }
+        setOtpValues(['', '', '', '']);
+        setOtpPurpose(''); // Clear otpPurpose after use
+      })
+      .catch((err) => {
+        setSignupFormError(err || 'Invalid OTP');
+      });
   };
 
   const handleLoginSubmit = () => {
@@ -145,35 +221,39 @@ function AuthenticationPage() {
     if (activeTab === 'mobile') {
       if (!showMobilePasswordField) {
         // User is trying to login with just mobile number, implies OTP
-        setOtpRecipient(countryCode + mobileNumber); // Set recipient for OTP
+        const recipient = countryCode + mobileNumber;
+        setOtpRecipient(recipient); // Keep local tracking for UI
         setOtpPurpose('login'); // Set OTP purpose to 'login'
-        setShowOtpCard(true);
-        setShowLoginCard(false);
-        setShowSignupForm(false);
-        setShowForgotPasswordCard(false); // Hide Forgot Password card
-        setShowMobilePasswordField(false);
-        setShowPassword(false);
+
+        dispatch(sendOtp({ recipient }))
+          .unwrap()
+          .then(() => {
+            setShowOtpCard(true);
+            setShowLoginCard(false);
+            setShowSignupForm(false);
+            setShowForgotPasswordCard(false);
+            setShowPassword(false);
+          })
+          .catch((err) => setSignupFormError(err || 'Failed to send OTP'));
       } else {
-        // User is trying to login with mobile and password
-        console.log('Proceeding with mobile and password login for:', mobileNumber);
-        // Simulate successful login and show confirmation card
-        setShowLoginCard(false);
-        setShowSignupForm(false);
-        setShowOtpCard(false);
-        setShowForgotPasswordCard(false);
-        setShowResetPasswordCard(false);
-        setShowConfirmationCard(true);
+        // User is trying to login with mobile and password (use Redux login)
+        const recipient = countryCode + mobileNumber;
+        dispatch(login({ recipient, password: loginPassword }))
+          .unwrap()
+          .then(() => {
+            navigate('/');
+          })
+          .catch((err) => setSignupFormError(err || 'Login failed'));
       }
     } else {
-      // For email login, proceed with email/password login logic
-      console.log('Proceeding with email login for:', emailAddress);
-      // Simulate successful login and show confirmation card
-      setShowLoginCard(false);
-      setShowSignupForm(false);
-      setShowOtpCard(false);
-      setShowForgotPasswordCard(false);
-      setShowResetPasswordCard(false);
-      setShowConfirmationCard(true);
+      // For email login, proceed with email/password login logic using Redux
+      const recipient = emailAddress;
+      dispatch(login({ recipient, password: loginPassword }))
+        .unwrap()
+        .then(() => {
+          navigate('/');
+        })
+        .catch((err) => setSignupFormError(err || 'Login failed'));
     }
   };
 
@@ -216,13 +296,15 @@ function AuthenticationPage() {
       return; // Prevent submission if there are errors
     }
 
-    if (activeTab === 'mobile') {
-      setOtpRecipient(countryCode + mobileNumber); // Set recipient for OTP
-    } else {
-      setOtpRecipient(emailAddress); // Set recipient for OTP
-    }
-    setOtpPurpose('reset_password'); // Set OTP purpose to 'reset_password'
-    setShowOtpCard(true);
+    const recipient = activeTab === 'mobile' ? countryCode + mobileNumber : emailAddress;
+    dispatch(sendOtp({ recipient }))
+      .unwrap()
+      .then(() => {
+        setOtpRecipient(recipient);
+        setOtpPurpose('reset_password'); // Set OTP purpose to 'reset_password'
+        setShowOtpCard(true);
+      })
+      .catch((err) => setSignupFormError(err || 'Failed to send OTP'));
     // setShowForgotPasswordCard(false); // Removed this line
   };
 
@@ -269,15 +351,21 @@ function AuthenticationPage() {
     }
     setPasswordMismatchError(false); // Clear any previous error
 
-    // If all validations pass, simulate successful signup and show confirmation card
-    setShowLoginCard(false);
-    setShowSignupForm(false);
-    setShowOtpCard(false);
-    setShowForgotPasswordCard(false);
-    setShowResetPasswordCard(false);
-    setShowConfirmationCard(true);
-    setSignupPassword(''); // Clear signup password
-    setSignupConfirmPassword(''); // Clear signup confirm password
+    const recipient = activeTab === 'mobile' ? countryCode + mobileNumber : emailAddress;
+
+    // Instead of directly signing up, send OTP and store pending signup data until OTP verification
+    dispatch(sendOtp({ recipient }))
+      .unwrap()
+      .then(() => {
+        setPendingSignup({ recipient, password: signupPassword });
+        setOtpRecipient(recipient);
+        setOtpPurpose('signup');
+        setShowOtpCard(true);
+        setShowSignupForm(false);
+        setSignupPassword(''); // keep confirm cleared for security
+        setSignupConfirmPassword('');
+      })
+      .catch((err) => setSignupFormError(err || 'Failed to send OTP'));
   };
 
   const handleResetPasswordSubmit = () => {
@@ -291,21 +379,25 @@ function AuthenticationPage() {
     }
 
     setResetPasswordError(''); // Clear any previous error
+    const recipient = auth.otpRecipient || otpRecipient;
 
-    // Here you would typically send the new password to your backend
-    console.log('Resetting password for:', otpRecipient, 'with new password:', newPassword);
-
-    // After successful password reset, show confirmation card
-    setShowResetPasswordCard(false);
-    setShowConfirmationCard(true); // Show confirmation card
-    setNewPassword('');
-    setConfirmNewPassword('');
+    dispatch(resetPassword({ recipient, newPassword }))
+      .unwrap()
+      .then(() => {
+        setNewPassword('');
+        setConfirmNewPassword('');
+        dispatch(clearOtp());
+        // Redirect to login after successful reset
+        navigate('/auth');
+      })
+      .catch((err) => setResetPasswordError(err || 'Failed to reset password'));
   };
 
   return (
     <div className="authentication-page auth-background">
       <img src="/Vector.svg" className="vector-image" alt="Vector" />
       <div className="auth-wrapper">
+
         {!showLoginCard && !showSignupForm && !showOtpCard && !showForgotPasswordCard ? (
           <div className="auth-card">
             <h2>Let’s Get Started!</h2>
@@ -361,7 +453,7 @@ function AuthenticationPage() {
                   <label>Password</label>
                   <div className="input-box">
                     <span className="icon"><FaEye /></span>
-                    <input type={showPassword ? 'text' : 'password'} placeholder="Password" />
+                    <input type={showPassword ? 'text' : 'password'} placeholder="Password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} />
                     <span className="icon right" onClick={togglePasswordVisibility}>
                       {showPassword ? <FaEyeSlash /> : <FaEye />}
                     </span>
@@ -405,7 +497,7 @@ function AuthenticationPage() {
                       <label>Password</label>
                       <div className="input-box">
                         <span className="icon"><FaEye /></span>
-                        <input type={showPassword ? 'text' : 'password'} placeholder="Password" />
+                        <input type={showPassword ? 'text' : 'password'} placeholder="Password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} />
                         <span className="icon right" onClick={togglePasswordVisibility}>
                           {showPassword ? <FaEyeSlash /> : <FaEye />}
                         </span>
@@ -418,7 +510,8 @@ function AuthenticationPage() {
             )}
 
             {/* Login button */}
-            <button className="login-btn" onClick={handleLoginSubmit}>LOG IN</button>
+            {auth.error && <p className="error-message">{auth.error}</p>}
+            <button className="login-btn" onClick={handleLoginSubmit} disabled={auth.loading}>{auth.loading ? 'Logging in...' : 'LOG IN'}</button>
 
             {/* Divider */}
             <div className="divider">
@@ -538,7 +631,8 @@ function AuthenticationPage() {
             {signupFormError && <p className="error-message">{signupFormError}</p>}
             {passwordMismatchError && <p className="error-message">Passwords do not match!</p>}
             {/* Sign Up button */}
-            <button className="login-btn" onClick={handleSignupSubmit}>SIGN UP</button>
+            {auth.error && <p className="error-message">{auth.error}</p>}
+            <button className="login-btn" onClick={handleSignupSubmit} disabled={auth.loading}>{auth.loading ? 'Signing up...' : 'SIGN UP'}</button>
 
             {/* Divider */}
             <div className="divider">
@@ -575,14 +669,40 @@ function AuthenticationPage() {
               <p className="otp-label">Verification Code</p>
 
               <div className="otp-inputs">
-                <input type="text" maxLength="1" value="5" />
-                <input type="text" maxLength="1" value="5" />
-                <input type="text" maxLength="1" value="5" />
-                <input type="text" maxLength="1" value="5" />
+                {otpValues.map((val, idx) => (
+                  <input
+                    key={idx}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength="1"
+                    value={val}
+                    onChange={(e) => {
+                      const v = e.target.value.replace(/\D/g, '').slice(-1);
+                      setOtpValues((prev) => {
+                        const next = [...prev];
+                        next[idx] = v;
+                        return next;
+                      });
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Backspace' && !otpValues[idx] && idx > 0) {
+                        const prevEl = e.target.previousSibling;
+                        if (prevEl) prevEl.focus();
+                      }
+                    }}
+                    onInput={(e) => {
+                      if (e.target.value && e.target.nextSibling) {
+                        e.target.nextSibling.focus();
+                      }
+                    }}
+                  />
+                ))}
               </div>
 
-              <button className="otp-primary" onClick={handleOtpVerification}>NEXT</button>
-              <button className="otp-secondary">RESEND CODE</button>
+              {(signupFormError || auth.error) && <p className="error-message">{signupFormError || auth.error}</p>}
+
+              <button className="otp-primary" onClick={handleOtpVerification} disabled={otpValues.join('').length !== 4 || auth.loading}>{auth.loading ? 'Verifying...' : 'NEXT'}</button>
+              <button className="otp-secondary" onClick={() => dispatch(sendOtp({ recipient: otpRecipient }))} disabled={auth.loading}>{auth.loading ? 'Resending...' : 'RESEND CODE'}</button>
 
             </div>
           </div>
@@ -617,9 +737,10 @@ function AuthenticationPage() {
             </div>
 
             {resetPasswordError && <p className="error-message">{resetPasswordError}</p>}
+            {auth.error && <p className="error-message">{auth.error}</p>}
 
             {/* Confirm Password button */}
-            <button className="login-btn" onClick={handleResetPasswordSubmit}>Confirm Password</button>
+            <button className="login-btn" onClick={handleResetPasswordSubmit} disabled={auth.loading || !newPassword || !confirmNewPassword || newPassword !== confirmNewPassword}>{auth.loading ? 'Processing...' : 'Confirm Password'}</button>
           </div>
         ) : showForgotPasswordCard ? ( // Moved this condition up
           // Forgot Password Card
@@ -667,7 +788,8 @@ function AuthenticationPage() {
             )}
 
             {/* Get Otp button */}
-            <button className="login-btn" onClick={handleGetOtpClick}>Get Otp</button>
+            {auth.error && <p className="error-message">{auth.error}</p>}
+            <button className="login-btn" onClick={handleGetOtpClick} disabled={auth.loading}>{auth.loading ? 'Sending...' : 'Get Otp'}</button>
 
             {/* Divider */}
             <div className="divider">
@@ -688,21 +810,6 @@ function AuthenticationPage() {
               <strong>Terms & conditions</strong> and
               <strong>Privacy policy</strong>
             </p>
-          </div>
-        ) : showConfirmationCard ? (
-          // Confirmation Card
-          <div className="confirm-wrapper">
-            <div className="confirm-card">
-
-              <div className="icon-wrapper">
-                <div className="icon-circle">
-                  <i class="fa-solid fa-check"></i>
-                </div>
-              </div>
-
-              <h2>Success</h2>
-
-            </div>
           </div>
         ) : (
           null
